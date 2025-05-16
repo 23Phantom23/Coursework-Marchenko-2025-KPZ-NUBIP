@@ -9,16 +9,12 @@ import 'providers/categories_provider.dart';
 import 'providers/transactions_provider.dart';
 import 'providers/theme_provider.dart';
 import 'services/database_service.dart';
-import 'utils/currency_formatter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Ініціалізуємо базу даних
   await DatabaseService.instance.database;
-  
-  // Ініціалізуємо форматтер валюти
-  await CurrencyFormatter.initialize();
   
   runApp(MyApp());
 }

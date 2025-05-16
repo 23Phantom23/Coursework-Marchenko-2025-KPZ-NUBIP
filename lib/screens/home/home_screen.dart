@@ -9,9 +9,9 @@ import '../../config/routes.dart';
 import '../../widgets/charts/expenses_pie_chart.dart';
 import '../../widgets/transaction_list_item.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/account.dart';
 import 'package:coursework_kpz/utils/currency_formatter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -20,7 +20,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   DateTime _selectedDate = DateTime.now();
-  String _defaultCurrency = 'UAH';
   String _timeFilter = 'month'; // 'day', 'week', 'month', 'year'
 
   @override
@@ -31,10 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _defaultCurrency = prefs.getString('defaultCurrency') ?? 'UAH';
-    });
   }
 
   Future<void> _loadData() async {
@@ -50,6 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadTransactionsByPeriod(TransactionsProvider provider) async {
+    final prefs = await SharedPreferences.getInstance();
+    final startDayOfWeek = prefs.getInt('startDayOfWeek') ?? 1; // 1 = Понеділок
+    
     DateTime startDate;
     DateTime endDate;
     
@@ -59,10 +57,20 @@ class _HomeScreenState extends State<HomeScreen> {
         endDate = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 23, 59, 59);
         break;
       case 'week':
-        // Знаходимо початок тижня (понеділок)
-        startDate = _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1));
+        // Знаходимо поточний день тижня (1-7, де 1 - понеділок)
+        int currentDayOfWeek = _selectedDate.weekday;
+        // Знаходимо день тижня для початку тижня (1-7, де 1 - понеділок)
+        int firstDayOfWeek = startDayOfWeek;
+        
+        // Розраховуємо зсув до початку тижня
+        int daysToSubtract = (currentDayOfWeek - firstDayOfWeek) % 7;
+        if (daysToSubtract < 0) daysToSubtract += 7;
+        
+        // Знаходимо початок тижня
+        startDate = _selectedDate.subtract(Duration(days: daysToSubtract));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
-        // Кінець тижня (неділя)
+        
+        // Кінець тижня (7 днів від початку)
         endDate = startDate.add(Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
         break;
       case 'year':
@@ -337,7 +345,7 @@ Widget _buildDrawer() {
             ),
             SizedBox(height: 8),
             Text(
-              CurrencyFormatter.formatSync(accountsProvider.totalBalance, _defaultCurrency),
+              CurrencyFormatter.formatSync(accountsProvider.totalBalance),
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -351,13 +359,13 @@ Widget _buildDrawer() {
                   Icons.arrow_downward,
                   Colors.green,
                   'Доходи',
-                  CurrencyFormatter.formatSync(accountsProvider.totalBalance, _defaultCurrency),
+                  CurrencyFormatter.formatSync(Provider.of<TransactionsProvider>(context).totalIncome),
                 ),
                 _balanceInfoItem(
                   Icons.arrow_upward,
                   Colors.red,
                   'Витрати',
-                  CurrencyFormatter.formatSync(accountsProvider.totalBalance, _defaultCurrency),
+                  CurrencyFormatter.formatSync(Provider.of<TransactionsProvider>(context).totalExpense),
                 ),
               ],
             ),
@@ -583,7 +591,6 @@ Widget _buildDrawer() {
                     orElse: () => Account(
                       name: 'Невідомий',
                       balance: 0,
-                      currency: 'UAH',
                       iconName: 'help',
                       color: '#9E9E9E',
                     ),

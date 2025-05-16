@@ -19,7 +19,6 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
   final _nameController = TextEditingController();
   final _balanceController = TextEditingController();
   
-  String _selectedCurrency = 'UAH';
   String _selectedIconName = 'credit_card';
   String _selectedColor = '#4CAF50';
   
@@ -34,7 +33,6 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
       _isEditing = true;
       _nameController.text = widget.account!.name;
       _balanceController.text = widget.account!.balance.toString();
-      _selectedCurrency = widget.account!.currency;
       _selectedIconName = widget.account!.iconName;
       _selectedColor = widget.account!.color;
     }
@@ -56,11 +54,10 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
         id: widget.account?.id,
         name: name,
         balance: balance,
-        currency: _selectedCurrency,
         iconName: _selectedIconName,
         color: _selectedColor,
       );
-      
+
       final accountsProvider = Provider.of<AccountsProvider>(context, listen: false);
       
       if (_isEditing) {
@@ -140,8 +137,6 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
                 _buildNameField(),
                 SizedBox(height: 16),
                 _buildBalanceField(),
-                SizedBox(height: 16),
-                _buildCurrencySelector(),
                 SizedBox(height: 16),
                 _buildIconSelector(),
                 SizedBox(height: 16),
@@ -233,48 +228,6 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
             
             return null;
           },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCurrencySelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Валюта',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedCurrency,
-                isExpanded: true,
-                items: AppConstants.currencies.map((currency) {
-                  return DropdownMenuItem<String>(
-                    value: currency,
-                    child: Text(currency),
-                  );
-                }).toList(),
-                onChanged: (String? value) {
-                  setState(() {
-                    _selectedCurrency = value!;
-                  });
-                },
-              ),
-            ),
-          ),
         ),
       ],
     );

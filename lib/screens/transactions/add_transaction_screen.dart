@@ -428,7 +428,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           child: Text(account.name, overflow: TextOverflow.ellipsis),
                         ),
                         Text(
-                          '${account.balance.toStringAsFixed(2)} ${account.currency}',
+                          '${account.balance.toStringAsFixed(2)}',
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 14,
@@ -514,7 +514,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           child: Text(account.name, overflow: TextOverflow.ellipsis),
                         ),
                         Text(
-                          '${account.balance.toStringAsFixed(2)} ${account.currency}',
+                          '${account.balance.toStringAsFixed(2)}',
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 14,

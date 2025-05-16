@@ -245,7 +245,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   orElse: () => Account(
                     name: 'Невідомий',
                     balance: 0,
-                    currency: 'UAH',
                     iconName: 'help',
                     color: '#9E9E9E',
                   ),

@@ -1,14 +1,12 @@
 // lib/screens/settings/settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../config/constants.dart';
 import 'package:provider/provider.dart';
 import '../../providers/accounts_provider.dart';
 import '../../providers/categories_provider.dart';
 import '../../providers/transactions_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/database_service.dart';
-import 'package:coursework_kpz/utils/currency_formatter.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -20,7 +18,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   
   int _startDayOfWeek = 1; // 1 = Понеділок, 7 = Неділя
   int _startDayOfMonth = 1; // День місяця
-  String _defaultCurrency = 'UAH';
   
   bool _isLoading = true;
 
@@ -38,7 +35,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _startDayOfWeek = prefs.getInt('startDayOfWeek') ?? 1;
       _startDayOfMonth = prefs.getInt('startDayOfMonth') ?? 1;
-      _defaultCurrency = prefs.getString('defaultCurrency') ?? 'UAH';
       _useCurrencySymbol = prefs.getBool('useCurrencySymbol') ?? true;
       _isLoading = false;
     });
@@ -54,7 +50,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       
       await prefs.setInt('startDayOfWeek', _startDayOfWeek);
       await prefs.setInt('startDayOfMonth', _startDayOfMonth);
-      await prefs.setString('defaultCurrency', _defaultCurrency);
       await prefs.setBool('useCurrencySymbol', _useCurrencySymbol);
       
       setState(() {
@@ -66,6 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
     }
   }
+
 
   Widget _buildCurrencyFormatSetting() {
     return Column(
@@ -90,7 +86,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   setState(() {
                     _useCurrencySymbol = value!;
                   });
-                  CurrencyFormatter.setUseCurrencySymbol(value!);
                 },
                 contentPadding: EdgeInsets.zero,
               ),
@@ -104,7 +99,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   setState(() {
                     _useCurrencySymbol = value!;
                   });
-                  CurrencyFormatter.setUseCurrencySymbol(value!);
                 },
                 contentPadding: EdgeInsets.zero,
               ),
@@ -148,12 +142,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                             SizedBox(height: 16),
-                            _buildStartDayOfWeekSetting(),
-                            SizedBox(height: 16),
-                            _buildStartDayOfMonthSetting(),
-                            SizedBox(height: 16),
-                            _buildDefaultCurrencySetting(),
-                            SizedBox(height: 16),
+                            // Сховали налаштування тижня і місяця
+                            // _buildStartDayOfWeekSetting(),
+                            // SizedBox(height: 16),
+                            // _buildStartDayOfMonthSetting(),
+                            // SizedBox(height: 16),
                             _buildCurrencyFormatSetting(),
                             SizedBox(height: 16),
                             _buildDarkModeSetting(),
@@ -245,157 +238,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildStartDayOfWeekSetting() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Початок тижня',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                value: _startDayOfWeek,
-                isExpanded: true,
-                items: [
-                  DropdownMenuItem<int>(
-                    value: 1,
-                    child: Text('Понеділок'),
-                  ),
-                  DropdownMenuItem<int>(
-                    value: 2,
-                    child: Text('Вівторок'),
-                  ),
-                  DropdownMenuItem<int>(
-                    value: 3,
-                    child: Text('Середа'),
-                  ),
-                  DropdownMenuItem<int>(
-                    value: 4,
-                    child: Text('Четвер'),
-                  ),
-                  DropdownMenuItem<int>(
-                    value: 5,
-                    child: Text('П\'ятниця'),
-                  ),
-                  DropdownMenuItem<int>(
-                    value: 6,
-                    child: Text('Субота'),
-                  ),
-                  DropdownMenuItem<int>(
-                    value: 7,
-                    child: Text('Неділя'),
-                  ),
-                ],
-                onChanged: (int? value) {
-                  setState(() {
-                    _startDayOfWeek = value!;
-                  });
-                },
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStartDayOfMonthSetting() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Початок місяця',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                value: _startDayOfMonth,
-                isExpanded: true,
-                items: List.generate(31, (index) {
-                  final day = index + 1;
-                  return DropdownMenuItem<int>(
-                    value: day,
-                    child: Text('$day число'),
-                  );
-                }),
-                onChanged: (int? value) {
-                  setState(() {
-                    _startDayOfMonth = value!;
-                  });
-                },
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDefaultCurrencySetting() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Основна валюта',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _defaultCurrency,
-                isExpanded: true,
-                items: AppConstants.currencies.map((currency) {
-                  return DropdownMenuItem<String>(
-                    value: currency,
-                    child: Text(currency),
-                  );
-                }).toList(),
-                onChanged: (String? value) {
-                  setState(() {
-                    _defaultCurrency = value!;
-                  });
-                },
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 

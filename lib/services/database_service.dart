@@ -33,11 +33,11 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         balance REAL NOT NULL,
-        currency TEXT NOT NULL,
         iconName TEXT NOT NULL,
         color TEXT NOT NULL
       )
     ''');
+
 
     await db.execute('''
       CREATE TABLE categories(
@@ -73,9 +73,8 @@ class DatabaseService {
   Future<void> _insertInitialData(Database db) async {
     // Додавання стандартних рахунків
     await db.insert('accounts', {
-      'name': 'Картка 1',
+      'name': 'Monobank Чорна',
       'balance': 1000.0,
-      'currency': 'UAH',
       'iconName': 'credit_card',
       'color': '#4CAF50'
     });
@@ -83,7 +82,6 @@ class DatabaseService {
     await db.insert('accounts', {
       'name': 'Готівка',
       'balance': 500.0,
-      'currency': 'UAH',
       'iconName': 'money',
       'color': '#2196F3'
     });

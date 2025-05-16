@@ -96,7 +96,7 @@ class TransactionListItem extends StatelessWidget {
     }
     
     return Text(
-      '$prefix${transaction.amount.toStringAsFixed(2)} ${account.currency}',
+      '$prefix${transaction.amount.toStringAsFixed(2)}',
       style: TextStyle(
         color: color,
         fontWeight: FontWeight.bold,

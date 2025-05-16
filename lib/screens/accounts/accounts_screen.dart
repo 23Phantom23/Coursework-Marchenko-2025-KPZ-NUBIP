@@ -1,6 +1,7 @@
 // lib/screens/accounts/accounts_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:coursework_kpz/utils/currency_formatter.dart';
 import '../../providers/accounts_provider.dart';
 import '../../config/routes.dart';
 import '../../models/account.dart';
@@ -82,9 +83,6 @@ class _AccountsScreenState extends State<AccountsScreen> {
     );
   }
 
-  // lib/screens/accounts/accounts_screen.dart
-// Змінити _buildAccountCard метод:
-
   Widget _buildAccountCard(Account account) {
     Color color;
     try {
@@ -132,13 +130,6 @@ class _AccountsScreenState extends State<AccountsScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          'Валюта: ${account.currency}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -155,13 +146,14 @@ class _AccountsScreenState extends State<AccountsScreen> {
               ),
               SizedBox(height: 4),
               Text(
-                '${account.balance.toStringAsFixed(2)} ${account.currency}',
+                CurrencyFormatter.formatSync(account.balance),
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: account.balance >= 0 ? Colors.green : Colors.red,
                 ),
               ),
+
             ],
           ),
         ),

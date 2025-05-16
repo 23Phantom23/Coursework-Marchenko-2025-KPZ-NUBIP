@@ -34,7 +34,6 @@ class AccountsProvider with ChangeNotifier {
         id: id,
         name: account.name,
         balance: account.balance,
-        currency: account.currency,
         iconName: account.iconName,
         color: account.color,
       );

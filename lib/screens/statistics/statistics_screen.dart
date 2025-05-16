@@ -8,7 +8,6 @@ import '../../providers/categories_provider.dart';
 import '../../providers/accounts_provider.dart';
 import '../../models/transaction.dart';
 import '../../models/category.dart';
-import '../../widgets/charts/expenses_pie_chart.dart';
 
 class StatisticsScreen extends StatefulWidget {
   @override
@@ -281,39 +280,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
           );
         }
         
+        // Обгортаємо у SingleChildScrollView
         return SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(), // Дозволяємо прокрутку навіть для малого вмісту
           padding: EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min, // Мінімальний розмір колонки
             children: [
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Розподіл витрат',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      AspectRatio(
-                        aspectRatio: 1.3,
-                        child: ExpensesPieChart(
-                          expensesByCategory: expensesByCategory,
-                          categories: categoriesProvider.categories,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              _buildPieChartCard(
+                'Розподіл витрат',
+                expensesByCategory,
+                categoriesProvider.categories,
+                Colors.red,
               ),
               SizedBox(height: 16),
               _buildCategoryExpensesList(
@@ -328,6 +307,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
       },
     );
   }
+
 
   Widget _buildIncomeTab() {
     return Consumer2<TransactionsProvider, CategoriesProvider>(
@@ -344,10 +324,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
           );
         }
         
+        // Обгортаємо у SingleChildScrollView
         return SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildPieChartCard(
                 'Розподіл доходів',
@@ -368,6 +351,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
       },
     );
   }
+
 
   Widget _buildSummaryCard(TransactionsProvider transactionsProvider) {
     final income = transactionsProvider.totalIncome;
@@ -862,6 +846,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
       );
     }
     
+    // Колір тексту, який відповідає поточній темі
+    final textColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black87;
+    
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -871,6 +858,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               title,
@@ -879,29 +867,49 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16),
-            AspectRatio(
-              aspectRatio: 1.3,
-              child: PieChart(
-                PieChartData(
-                  sections: _createPieSections(amountsByCategory, categories, defaultColor),
-                  sectionsSpace: 2,
-                  centerSpaceRadius: 40,
-                  startDegreeOffset: -90,
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              children: _createLegendItems(amountsByCategory, categories, defaultColor),
+            // Відступ перед діаграмою
+            SizedBox(height: 24),
+            // Використовуємо LayoutBuilder для адаптивного розміру
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // Розрахунок розміру діаграми
+                final chartSize = constraints.maxWidth * 0.7;
+                
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: chartSize,
+                      child: PieChart(
+                        PieChartData(
+                          sections: _createPieSections(amountsByCategory, categories, defaultColor),
+                          sectionsSpace: 2,
+                          centerSpaceRadius: chartSize * 0.2,
+                          startDegreeOffset: -90,
+                        ),
+                      ),
+                    ),
+                    // Відступ після діаграми
+                    SizedBox(height: 28),
+                    // Використовуємо Wrap для автоматичного перенесення елементів
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.center,
+                      children: _createLegendItems(amountsByCategory, categories, defaultColor, textColor),
+                    ),
+                    // Додаємо додатковий відступ в кінці
+                    SizedBox(height: 8),
+                  ],
+                );
+              },
             ),
           ],
         ),
       ),
     );
   }
+
 
   List<PieChartSectionData> _createPieSections(
     Map<int, double> amountsByCategory,
@@ -952,6 +960,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     Map<int, double> amountsByCategory,
     List<Category> categories,
     Color defaultColor,
+    Color textColor, // Новий параметр
   ) {
     final totalAmount = amountsByCategory.values.fold(0.0, (sum, amount) => sum + amount);
     
@@ -979,28 +988,34 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
         color = defaultColor;
       }
 
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              '${category.name} (${percentage}%)',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
+      // Використовуємо Container з обмеженою шириною для кращого розміщення
+      return Container(
+        constraints: BoxConstraints(maxWidth: 150),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
               ),
             ),
-          ),
-        ],
+            SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                '${category.name} (${percentage}%)',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: textColor, // Використовуємо колір з теми
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
+          ],
+        ),
       );
     }).toList();
   }
